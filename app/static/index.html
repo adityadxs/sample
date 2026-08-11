@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beverage Bottle Vision & Continual Learning Platform</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #070913;
+      --bg-gradient: radial-gradient(circle at 50% 0%, #151838 0%, #070913 85%);
+      --panel-bg: rgba(18, 22, 41, 0.65);
+      --panel-border: rgba(99, 102, 241, 0.18);
+      --panel-border-glow: rgba(99, 102, 241, 0.45);
+      --card-bg: rgba(28, 33, 62, 0.45);
+      --card-border: rgba(255, 255, 255, 0.07);
+      
+      --accent-indigo: #6366f1;
+      --accent-teal: #14b8a6;
+      --accent-pink: #ec4899;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid var(--panel-border);
+      background: rgba(7, 9, 19, 0.85);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-teal));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .badge-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-emerald);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* Main Container & Navigation */
+    main {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 32px 60px;
+      flex: 1;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 12px;
+    }
+
+    .nav-btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-btn.active {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: var(--panel-border-glow);
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Tab Views */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Prediction Grid Layout */
+    .vision-layout {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .vision-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Glass Panels */
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Upload & Canvas Area */
+    .upload-zone {
+      border: 2px dashed var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.3);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent-indigo);
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    .upload-icon {
+      font-size: 38px;
+      color: var(--accent-indigo);
+      margin-bottom: 12px;
+    }
+
+    .upload-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .upload-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-indigo), #4f46e5);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Canvas / Image Display */
+    .viewer-box {
+      margin-top: 20px;
+      position: relative;
+      background: #000;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid var(--panel-border);
+      min-height: 380px;
+    }
+
+    #imageCanvas {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* KPI Summary Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 800px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    /* Inventory Counts Card */
+    .inventory-section {
+      margin-bottom: 24px;
+    }
+
+    .sku-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .sku-chip {
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 8px 14px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .chip-count {
+      background: var(--accent-indigo);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    /* Detection List / Table */
+    .detection-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .detection-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .detection-card:hover, .detection-card.active-det {
+      border-color: var(--accent-indigo);
+      background: rgba(99, 102, 241, 0.12);
+      transform: translateX(3px);
+    }
+
+    .det-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .det-index {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent-teal);
+      background: rgba(20, 184, 166, 0.15);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+    }
+
+    .det-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .det-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .badge-accepted {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-review {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-manual {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .det-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .confidence-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Data Table Styling */
+    .data-table-container {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .data-table th {
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .data-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-main);
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-box {
+      background: #0f1326;
+      border: 1px solid var(--panel-border-glow);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      max-width: 540px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-indigo);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-group">
+      <div class="logo-icon">
+        <i class="fa-solid fa-wine-bottle"></i>
+      </div>
+      <div>
+        <h1 class="brand-title">Beverage Vision Platform</h1>
+        <p class="brand-subtitle">Refrigerator Bottle Detection & SKU Identification System</p>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="badge-status" id="systemStatusBadge">
+        <div class="status-dot"></div>
+        <span id="systemStatusText">API Online</span>
+      </div>
+      <div class="badge-status" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: var(--accent-indigo);">
+        <i class="fa-solid fa-code-branch"></i>
+        <span id="activeModelVersion">v1.0.0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main>
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="nav-btn active" onclick="switchTab('visionTab', this)">
+        <i class="fa-solid fa-eye"></i> Detection & SKU Vision
+      </button>
+      <button class="nav-btn" onclick="switchTab('catalogTab', this)">
+        <i class="fa-solid fa-boxes-stacked"></i> SKU Registry (<span id="skuCountNav">--</span>)
+      </button>
+      <button class="nav-btn" onclick="switchTab('feedbackTab', this)">
+        <i class="fa-solid fa-graduation-cap"></i> Review & Training Queue
+      </button>
+      <button class="nav-btn" onclick="switchTab('modelTab', this)">
+        <i class="fa-solid fa-microchip"></i> Model Lifecycle & Metrics
+      </button>
+    </div>
+
+    <!-- TAB 1: VISION & PREDICTION -->
+    <div id="visionTab" class="tab-content active">
+      <!-- KPI Stats -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">Total Bottles</span>
+          <span class="kpi-value" id="kpiTotalBottles">0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Unique SKUs</span>
+          <span class="kpi-value" id="kpiUniqueSkus">0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Accepted</span>
+          <span class="kpi-value" style="color: var(--accent-emerald);" id="kpiAccepted">0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Review Queue</span>
+          <span class="kpi-value" style="color: var(--accent-amber);" id="kpiReview">0</span>
+        </div>
+      </div>
+
+      <div class="vision-layout">
+        <!-- Left Column: Upload & Canvas -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-camera"></i> Refrigerator Image Viewer</h2>
+            <span style="font-size: 13px; color: var(--text-dim);" id="imageDimLabel"></span>
+          </div>
+
+          <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+            <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+            <div class="upload-text">Drop refrigerator shelf image or browse</div>
+            <div class="upload-sub">Supports JPEG, PNG, WebP (Max 25MB)</div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+              <i class="fa-solid fa-upload"></i> Upload Image
+            </button>
+            <button class="btn btn-secondary" onclick="loadSampleImage()">
+              <i class="fa-solid fa-image"></i> Load Sample Shelf Demo
+            </button>
+          </div>
+
+          <div class="viewer-box">
+            <canvas id="imageCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Right Column: Results & SKU Breakdown -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><i class="fa-solid fa-list-check"></i> Identified Bottles & SKUs</h2>
+            <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 10px;" onclick="refreshCurrentDetections()">
+              <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+          </div>
+
+          <!-- Inventory Counts -->
+          <div class="inventory-section">
+            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Inventory SKU Summary</div>
+            <div class="sku-chips-container" id="inventoryChips">
+              <span style="color: var(--text-dim); font-size: 13px;">No bottles detected yet. Upload an image to start.</span>
+            </div>
+          </div>
+
+          <!-- Detected Bottles List -->
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;">Detections Breakdown</div>
+          <div class="detection-list" id="detectionsList">
+            <div style="text-align: center; color: var(--text-dim); padding: 40px 0; font-size: 13px;">
+              <i class="fa-regular fa-image" style="font-size: 28px; margin-bottom: 10px; display: block;"></i>
+              Upload an image on the left to inspect bottles
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SKU REGISTRY & CATALOG -->
+    <div id="catalogTab" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title"><i class="fa-solid fa-boxes-stacked"></i> SKU Registry & Product Master</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Configurable SKU database (primary classification targets).</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddSkuModal()">
+            <i class="fa-solid fa-plus"></i> Add New SKU
+          </button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+          <input type="text" id="skuSearchInput" class="form-control" placeholder="Search by SKU Name or Brand..." style="max-width: 300px;" oninput="filterSkuTable()">
+          <select id="skuCategoryFilter" class="form-control" style="max-width: 200px;" onchange="filterSkuTable()">
+            <option value="">All Categories</option>
+            <option value="soft_drink">Soft Drink</option>
+            <option value="energy_drink">Energy Drink</option>
+            <option value="juice">Juice</option>
+            <option value="water">Water</option>
+          </select>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table" id="skuTable">
+            <thead>
+              <tr>
+                <th>SKU Identifier</th>
+                <th>Product Name</th>
+                <th>Brand (Derived)</th>
+                <th>Category</th>
+                <th>Volume</th>
+                <th>Pack Type</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="skuTableBody">
+              <tr><td colspan="7" style="text-align:center;">Loading SKU registry...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: REVIEW & TRAINING QUEUE -->
+    <div id="feedbackTab" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title"><i class="fa-solid fa-graduation-cap"></i> Verified Training Samples Queue</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Human corrections and verified samples ready for incremental training batches.</p>
+          </div>
+        </div>
+        <div id="feedbackQueueList" style="padding: 20px; text-align: center; color: var(--text-muted);">
+          Verified corrections will accumulate here before triggering the next continual learning cycle.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: MODEL LIFECYCLE & METRICS -->
+    <div id="modelTab" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title"><i class="fa-solid fa-microchip"></i> Continual Learning & Validation Benchmarks</h2>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Active Model</span>
+            <span class="kpi-value" id="metricsModelVersion">v1.0.0</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Top-1 Accuracy</span>
+            <span class="kpi-value" style="color: var(--accent-emerald);" id="metricsTop1">94.5%</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Macro F1</span>
+            <span class="kpi-value" style="color: var(--accent-teal);" id="metricsF1">0.940</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Old SKU Retention</span>
+            <span class="kpi-value" style="color: var(--accent-indigo);" id="metricsRetention">97.2%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL: Human Feedback / SKU Correction -->
+  <div class="modal-overlay" id="feedbackModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Correct SKU Label</h3>
+        <button class="close-btn" onclick="closeFeedbackModal()">&times;</button>
+      </div>
+      <form id="feedbackForm" onsubmit="submitCorrection(event)">
+        <input type="hidden" id="fbDetectionId">
+        <input type="hidden" id="fbImageId">
+        <input type="hidden" id="fbPredictedSku">
+
+        <div class="form-group">
+          <label>Predicted SKU</label>
+          <input type="text" id="fbPredictedDisplay" class="form-control" disabled>
+        </div>
+
+        <div class="form-group">
+          <label>Corrected SKU (from Registry) *</label>
+          <select id="fbCorrectedSku" class="form-control" required>
+            <!-- Populated dynamically from SKU registry -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Notes / Comments</label>
+          <textarea id="fbComments" class="form-control" rows="3" placeholder="Optional comments on bottle occlusion, reflections, etc."></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeFeedbackModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Submit to Training Queue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add New SKU -->
+  <div class="modal-overlay" id="addSkuModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-plus-circle"></i> Register New SKU</h3>
+        <button class="close-btn" onclick="closeAddSkuModal()">&times;</button>
+      </div>
+      <form id="addSkuForm" onsubmit="handleCreateSku(event)">
+        <div class="form-group">
+          <label>SKU ID (Unique Code) *</label>
+          <input type="text" id="newSkuId" class="form-control" placeholder="e.g. COCA_COLA_750ML_PET" required>
+        </div>
+        <div class="form-group">
+          <label>Product / SKU Name *</label>
+          <input type="text" id="newSkuName" class="form-control" placeholder="e.g. Coca-Cola Original 750ml PET" required>
+        </div>
+        <div class="form-group">
+          <label>Brand *</label>
+          <input type="text" id="newSkuBrand" class="form-control" placeholder="e.g. Coca-Cola" required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="newSkuCategory" class="form-control" placeholder="e.g. soft_drink">
+          </div>
+          <div class="form-group">
+            <label>Volume (ml)</label>
+            <input type="number" id="newSkuVolume" class="form-control" placeholder="e.g. 750">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeAddSkuModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save SKU</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    let allSkus = [];
+    let currentPrediction = null;
+    let selectedDetectionIndex = null;
+    let currentImageElement = null;
+
+    // Initialize application
+    window.addEventListener('DOMContentLoaded', async () => {
+      await fetchModelStatus();
+      await fetchSkus();
+    });
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    async function fetchModelStatus() {
+      try {
+        const res = await fetch('/model/status');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('activeModelVersion').innerText = data.current_model_version;
+          document.getElementById('metricsModelVersion').innerText = data.current_model_version;
+          if (data.validation_metrics) {
+            document.getElementById('metricsTop1').innerText = (data.validation_metrics.top1_accuracy * 100).toFixed(1) + '%';
+            document.getElementById('metricsF1').innerText = data.validation_metrics.macro_f1.toFixed(3);
+            document.getElementById('metricsRetention').innerText = (data.validation_metrics.old_sku_retention * 100).toFixed(1) + '%';
+          }
+        }
+      } catch (err) {
+        console.warn("Model status check failed:", err);
+      }
+    }
+
+    async function fetchSkus() {
+      try {
+        const res = await fetch('/skus');
+        if (res.ok) {
+          allSkus = await res.json();
+          document.getElementById('skuCountNav').innerText = allSkus.length;
+          renderSkuTable(allSkus);
+          populateSkuDropdown(allSkus);
+        }
+      } catch (err) {
+        console.error("Error fetching SKUs:", err);
+      }
+    }
+
+    function renderSkuTable(skus) {
+      const tbody = document.getElementById('skuTableBody');
+      if (!skus.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-dim);">No SKUs registered yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = skus.map(s => `
+        <tr>
+          <td><code style="color:var(--accent-teal); font-weight:700;">${s.sku_id}</code></td>
+          <td><b>${s.sku_name}</b></td>
+          <td><span class="badge badge-accepted">${s.brand}</span></td>
+          <td>${s.category || '--'}</td>
+          <td>${s.volume_ml ? s.volume_ml + ' ml' : '--'}</td>
+          <td>${s.pack_type || '--'}</td>
+          <td>${s.active ? '<span style="color:var(--accent-emerald);"><i class="fa-solid fa-circle-check"></i> Active</span>' : '<span style="color:var(--text-dim);">Inactive</span>'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function populateSkuDropdown(skus) {
+      const select = document.getElementById('fbCorrectedSku');
+      select.innerHTML = skus.map(s => `
+        <option value="${s.sku_id}">${s.sku_name} (${s.brand})</option>
+      `).join('');
+    }
+
+    function filterSkuTable() {
+      const search = document.getElementById('skuSearchInput').value.toLowerCase();
+      const cat = document.getElementById('skuCategoryFilter').value;
+      const filtered = allSkus.filter(s => {
+        const matchSearch = s.sku_name.toLowerCase().includes(search) || s.brand.toLowerCase().includes(search) || s.sku_id.toLowerCase().includes(search);
+        const matchCat = !cat || (s.category === cat);
+        return matchSearch && matchCat;
+      });
+      renderSkuTable(filtered);
+    }
+
+    // Image Upload & Prediction Handlers
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        uploadAndPredict(file);
+      }
+    }
+
+    async function loadSampleImage() {
+      try {
+        const res = await fetch('/static/sample_shelf.png');
+        if (!res.ok) {
+          alert("Sample shelf demo image not found. Upload an image instead.");
+          return;
+        }
+        const blob = await res.blob();
+        const file = new File([blob], "sample_shelf.png", { type: "image/png" });
+        uploadAndPredict(file);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load sample image.");
+      }
+    }
+
+    async function uploadAndPredict(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Load image on canvas preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          currentImageElement = img;
+          drawCanvas([]);
+          document.getElementById('imageDimLabel').innerText = `${img.naturalWidth} x ${img.naturalHeight}px`;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      // Call /predict API
+      try {
+        document.getElementById('detectionsList').innerHTML = '<div style="text-align:center; padding:30px;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--accent-indigo);"></i><p style="margin-top:10px; font-size:13px;">Analyzing bottles and identifying SKUs...</p></div>';
+        
+        const response = await fetch('/predict', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Prediction failed with HTTP ${response.status}`);
+        }
+
+        currentPrediction = await response.json();
+        renderPredictionResults(currentPrediction);
+      } catch (err) {
+        alert("Prediction error: " + err.message);
+        document.getElementById('detectionsList').innerHTML = `<div style="color:var(--accent-rose); text-align:center; padding:20px;">${err.message}</div>`;
+      }
+    }
+
+    function renderPredictionResults(pred) {
+      // 1. Update KPIs
+      document.getElementById('kpiTotalBottles').innerText = pred.total_bottles;
+      const uniqueSkus = Object.keys(pred.sku_counts || {}).length;
+      document.getElementById('kpiUniqueSkus').innerText = uniqueSkus;
+
+      let acceptedCount = 0;
+      let reviewCount = 0;
+      pred.detections.forEach(d => {
+        if (d.review_status === 'accepted') acceptedCount++;
+        else reviewCount++;
+      });
+      document.getElementById('kpiAccepted').innerText = acceptedCount;
+      document.getElementById('kpiReview').innerText = reviewCount;
+
+      // 2. Inventory SKU Chips
+      const chipsContainer = document.getElementById('inventoryChips');
+      if (Object.keys(pred.sku_counts).length === 0) {
+        chipsContainer.innerHTML = '<span style="color:var(--text-dim); font-size:13px;">No bottles detected.</span>';
+      } else {
+        chipsContainer.innerHTML = Object.entries(pred.sku_counts).map(([sku_id, count]) => {
+          const skuObj = allSkus.find(s => s.sku_id === sku_id);
+          const name = skuObj ? skuObj.sku_name : sku_id;
+          return `
+            <div class="sku-chip">
+              <span><b>${name}</b></span>
+              <span class="chip-count">${count}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 3. Detection Breakdown List
+      const listContainer = document.getElementById('detectionsList');
+      listContainer.innerHTML = pred.detections.map((det, index) => {
+        const badgeClass = det.review_status === 'accepted' ? 'badge-accepted' : (det.review_status === 'review_queue' ? 'badge-review' : 'badge-manual');
+        const confPct = Math.round(det.confidence * 100);
+        return `
+          <div class="detection-card" id="det-card-${index}" onclick="highlightDetection(${index})">
+            <div class="det-left">
+              <span class="det-index">#${index + 1}</span>
+              <div class="det-info">
+                <h4>${det.sku_name}</h4>
+                <p><span class="badge ${badgeClass}">${det.review_status}</span> &bull; Brand: <b>${det.brand}</b></p>
+              </div>
+            </div>
+            <div class="det-right">
+              <span class="confidence-score">${confPct}%</span>
+              <button class="btn btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="event.stopPropagation(); openFeedbackModal(${index})">
+                <i class="fa-solid fa-pen"></i> Correct
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 4. Draw bounding boxes on canvas
+      drawCanvas(pred.detections);
+    }
+
+    function drawCanvas(detections) {
+      const canvas = document.getElementById('imageCanvas');
+      if (!currentImageElement) return;
+
+      const ctx = canvas.getContext('2d');
+      canvas.width = currentImageElement.naturalWidth;
+      canvas.height = currentImageElement.naturalHeight;
+
+      ctx.drawImage(currentImageElement, 0, 0);
+
+      detections.forEach((det, idx) => {
+        const [x1, y1, x2, y2] = det.bbox;
+        const w = x2 - x1;
+        const h = y2 - y1;
+        const isSelected = (selectedDetectionIndex === idx);
+
+        // Box Style
+        ctx.strokeStyle = isSelected ? '#ec4899' : (det.review_status === 'accepted' ? '#10b981' : '#f59e0b');
+        ctx.lineWidth = isSelected ? 6 : 3;
+        ctx.strokeRect(x1, y1, w, h);
+
+        // Label background
+        ctx.fillStyle = isSelected ? 'rgba(236, 72, 153, 0.9)' : 'rgba(15, 23, 42, 0.85)';
+        ctx.fillRect(x1, y1 > 28 ? y1 - 28 : y1, Math.max(w, 140), 26);
+
+        // Label Text
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px Inter, sans-serif';
+        ctx.fillText(`#${idx + 1} ${det.sku_name.slice(0, 18)} (${Math.round(det.confidence * 100)}%)`, x1 + 6, (y1 > 28 ? y1 - 10 : y1 + 18));
+      });
+    }
+
+    function highlightDetection(idx) {
+      selectedDetectionIndex = idx;
+      document.querySelectorAll('.detection-card').forEach(el => el.classList.remove('active-det'));
+      const card = document.getElementById(`det-card-${idx}`);
+      if (card) card.classList.add('active-det');
+      if (currentPrediction) {
+        drawCanvas(currentPrediction.detections);
+      }
+    }
+
+    // Modal Handlers
+    function openFeedbackModal(idx) {
+      if (!currentPrediction || !currentPrediction.detections[idx]) return;
+      const det = currentPrediction.detections[idx];
+      document.getElementById('fbDetectionId').value = det.detection_id;
+      document.getElementById('fbImageId').value = currentPrediction.image_id;
+      document.getElementById('fbPredictedSku').value = det.sku_id;
+      document.getElementById('fbPredictedDisplay').value = `${det.sku_name} (${det.sku_id})`;
+      document.getElementById('feedbackModal').classList.add('active');
+    }
+
+    function closeFeedbackModal() {
+      document.getElementById('feedbackModal').classList.remove('active');
+    }
+
+    async function submitCorrection(e) {
+      e.preventDefault();
+      const payload = {
+        image_id: document.getElementById('fbImageId').value,
+        detection_id: document.getElementById('fbDetectionId').value,
+        predicted_sku_id: document.getElementById('fbPredictedSku').value,
+        corrected_sku_id: document.getElementById('fbCorrectedSku').value,
+        comments: document.getElementById('fbComments').value,
+      };
+
+      try {
+        const res = await fetch('/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          alert("Human feedback recorded! Verified sample added to training queue.");
+          closeFeedbackModal();
+          await fetchModelStatus();
+        } else {
+          const err = await res.json();
+          alert("Failed to submit feedback: " + (err.detail || "Error"));
+        }
+      } catch (err) {
+        alert("Error submitting feedback: " + err.message);
+      }
+    }
+
+    function openAddSkuModal() {
+      document.getElementById('addSkuModal').classList.add('active');
+    }
+
+    function closeAddSkuModal() {
+      document.getElementById('addSkuModal').classList.remove('active');
+    }
+
+    async function handleCreateSku(e) {
+      e.preventDefault();
+      const payload = {
+        sku_id: document.getElementById('newSkuId').value.trim(),
+        sku_name: document.getElementById('newSkuName').value.trim(),
+        brand: document.getElementById('newSkuBrand').value.trim(),
+        category: document.getElementById('newSkuCategory').value.trim() || undefined,
+        volume_ml: parseFloat(document.getElementById('newSkuVolume').value) || undefined,
+        active: true,
+      };
+
+      try {
+        const res = await fetch('/skus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          alert(`SKU '${payload.sku_id}' successfully registered!`);
+          closeAddSkuModal();
+          document.getElementById('addSkuForm').reset();
+          await fetchSkus();
+        } else {
+          const err = await res.json();
+          alert("Error: " + (err.detail || "Failed to register SKU"));
+        }
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
