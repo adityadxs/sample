@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Beverage Bottle Vision & Continual Learning System
 
 A production-oriented API system for detecting bottles inside transparent beverage refrigerators and identifying exact product SKUs with continual learning and catastrophic forgetting protection.
@@ -119,3 +120,6 @@ Execute the automated test suite with `pytest`:
 - **Phase 5**: Implement model versioning, validation benchmarks, and rollback.
 - **Phase 6-8**: Integrate object detector, ViT/CNN classifier, and continual learning worker.
 - **Phase 9**: End-to-end integration and containerization.
+=======
+# sample
+>>>>>>> 7c82ac55d928a5fd258ef348492495be9e7084a2
